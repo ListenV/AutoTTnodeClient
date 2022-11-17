@@ -1,4 +1,4 @@
 
-30 2 * * * python3 /root/AutomationTTnode/sendTTnodeMSG.py
+30 2 * * * python3 /root/AutoTTnodeClient/AutoTTnodeClient.py
 
-0 12 * * * cd /root/AutomationTTnode && git pull
+0 12 * * * cd /root/AutoTTnodeClient && git pull
