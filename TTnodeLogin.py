@@ -56,14 +56,14 @@ path = sys.path[0]
 phonenum = input("请输入手机号码回车键提交:\n")
 phonenum = str(phonenum)
 if len(phonenum) != 11:
-    print("请输入正确的手机号码!!请重新运行")
+    print("手机号码不足或超出11位！\n请重新运行")
     exit()
 getCode(phonenum)
 print("验证码发送成功请耐性等待！\n")
 authCode = input("请确保你输入验证码短信是甜糖发的验证码短信，以免造成经济损失，概不负责。\n请输入验证码：\n")
 authCode = str(authCode)
 if len(authCode) != 6:
-    print("请输入正确的验证码!!请重新运行")
+    print("请输入正确的6位验证码!!\n请重新运行")
     exit()
 authorization = getAuthorization(phonenum, authCode)
 print("你的authorization：\n\n" + authorization + "\n\n")
@@ -79,5 +79,5 @@ try:
 finally:
     if file:
         file.close()
-print("已经配置成功了，请用python执行AutoTTnodeClient.py文件，以及配置定时程序。")
+print("已配置成功！\n请用python执行AutoTTnodeClient.py文件，以及配置定时程序。")
 exit()

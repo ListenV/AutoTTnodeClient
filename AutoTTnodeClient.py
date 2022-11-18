@@ -14,6 +14,7 @@ msgTitle = "【甜糖星愿】日结详细"
 msg = "\n"
 
 
+# 使用 QMSG 通知
 def sendQMSG(msg):
     url = "https://qmsg.zendee.cn/send/584ebe94943d833310a421e090c697c9"
     header = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -32,7 +33,8 @@ def sendQMSG(msg):
     return
 
 
-def sendPushPlus(text, desp):  # 发送PushPlus代码
+# 使用 PushPlus 通知
+def sendPushPlus(text, desp):
     url = "http://www.pushplus.plus/send"
     header = {"Content-Type": "application/json"}
     body_json = {"token": PushPlus_token, "title": text, "content": desp, "template": "html"}
@@ -49,7 +51,8 @@ def sendPushPlus(text, desp):  # 发送PushPlus代码
     return
 
 
-def sendServerJiang(text, desp):  # 发送server酱代码
+# 使用 Server 酱通知
+def sendServerJiang(text, desp):
     url = "https://sc.ftqq.com/" + sckey + ".send"
     header = {"Content-Type": "application/x-www-form-urlencoded"}
     body_json = "text=" + text + "&" + "desp=" + desp
@@ -67,7 +70,8 @@ def sendServerJiang(text, desp):  # 发送server酱代码
     return
 
 
-def getInitInfo():  # 甜糖用户初始化信息，可以获取待收取的推广信息数，可以获取账户星星数
+# 甜糖用户初始化信息，可以获取待收取的推广信息数，可以获取账户星星数
+def getInitInfo():
     url = "http://tiantang.mogencloud.com/web/api/account/message/loading"
     header = {"Content-Type": "application/json", "authorization": authorization}
     http = urllib3.PoolManager()
@@ -83,11 +87,11 @@ def getInitInfo():  # 甜糖用户初始化信息，可以获取待收取的推�
                         "#### authorization已经失效，请重新抓包填写!\n填写邀请码123463支持作者！\n")
         exit()
     data = data['data']
-
     return data
 
 
-def getDevices():  # 获取当前设备列表，可以获取待收的星星数
+# 获取设备列表，可以获取待收的星星数
+def getDevices():
     url = "http://tiantang.mogencloud.com/api/v1/devices?page=1&type=2&per_page=200"
     header = {"Content-Type": "application/json", "authorization": authorization}
     http = urllib3.PoolManager()
@@ -109,7 +113,8 @@ def getDevices():  # 获取当前设备列表，可以获取待收的星星数
     return data
 
 
-def promote_score_logs(score):  # 收取推广奖励星星
+# 收取推广奖励星星
+def promote_score_logs(score):
     global msg
     if score == 0:
         msg = msg + "\n 【推广奖励】0-🌟\n"
@@ -137,7 +142,8 @@ def promote_score_logs(score):  # 收取推广奖励星星
     return
 
 
-def score_logs(device_id, score, name):  # 收取设备奖励
+# 收取设备奖励
+def score_logs(device_id, score, name):
     global msg
     if score == 0:
         msg = msg + "\n 【" + name + "】0-🌟\n"
@@ -165,7 +171,8 @@ def score_logs(device_id, score, name):  # 收取设备奖励
     return
 
 
-def sign_in():  # 签到功能
+# 签到功能
+def sign_in():
     url = "http://tiantang.mogencloud.com/web/api/account/sign_in"
     header = {"Content-Type": "application/json", "authorization": authorization}
     http = urllib3.PoolManager()
@@ -194,7 +201,6 @@ def readConfig(filePath):
         if file:
             file.close()
             print("文件流已经关闭")
-
     return result
 
 
@@ -204,17 +210,17 @@ config = readConfig(path + "/TTnodeConfig.conf")
 print("config:" + config)
 
 if len(config) == 0:
-    print("错误提示TTnodeConfig.conf为空，请重新运行TTnodeLogin.py")
+    print("错误提示：\nTTnodeConfig.conf为空！请重新运行TTnodeLogin.py")
     exit()
 
 config = eval(config)  # 转成字典
 authorization = config.get("authorization", "")
 sckey = config.get("sckey", "")
 if len(authorization) == 0:
-    print("错误提示authorization为空，请重新运行TTnodeLogin.py")
+    print("错误提示：\nauthorization为空，请重新运行TTnodeLogin.py")
     exit()
 if len(sckey) == 0:
-    print("错误提示sckey为空，请重新运行TTnodeLogin.py")
+    print("错误提示：\nSckey为空，请重新运行TTnodeLogin.py")
     exit()
 authorization = authorization.strip()
 sckey = sckey.strip()
