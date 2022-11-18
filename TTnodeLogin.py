@@ -6,16 +6,24 @@ import datetime as dt
 import time
 import sys
 
+baseURL = "http://tiptime-api.com"
+# 发送短信验证码
+sendSmsUrl = baseURL + "/web/api/v2/login/code"
+loginUrl = baseURL + "/web/api/login"
 
-# 获取验证码！
-def getCode(phone):
+
+# 获取图片验证码
+
+
+# 发送短信验证码！
+def sendSmsCode(phone):
     print(phone)
-    url = "http://tiantang.mogencloud.com/web/api/login/code"
-    body_json = "phone=" + phone
+    body_json = "phone=" + phone + ", captchaId=    , captchaCode=  "
     encoded_body = body_json.encode('utf-8')
     http = urllib3.PoolManager()
-    header = {"Content-Type": "application/x-www-form-urlencoded"}
-    response = http.request('POST', url, body=encoded_body, headers=header)
+    header = {"User-Agent": "Dart/2.17 (dart:io)", "Host": "tiptime-api.com", "Platform": "android",
+              "Content-Type": "application/json"}
+    response = http.request('POST', sendSmsUrl, body=encoded_body, headers=header)
     if response.status != 201 and response.status != 200:
         print("getCode方法请求失败，结束程序")
         exit()
@@ -31,12 +39,12 @@ def getCode(phone):
 
 # 获取Authorization
 def getAuthorization(phone, authCode):
-    url = "http://tiantang.mogencloud.com/web/api/login"
-    body_json = "phone=" + phone + "&authCode=" + authCode
+    body_json = "?phone=" + phone + "&authCode=" + authCode
     encoded_body = body_json.encode('utf-8')
-    header = {"Content-Type": "application/x-www-form-urlencoded"}
+    header = {"User-Agent": "Dart/2.17 (dart:io)", "Host": "tiptime-api.com", "Platform": "android",
+              "Content-Type": "application/x-www-form-urlencoded"}
     http = urllib3.PoolManager()
-    response = http.request('POST', url, body=encoded_body, headers=header)
+    response = http.request('POST', loginUrl, body=encoded_body, headers=header)
     if response.status != 201 and response.status != 200:
         print("getAuthorization方法请求失败，结束程序")
         exit()
@@ -58,7 +66,7 @@ phonenum = str(phonenum)
 if len(phonenum) != 11:
     print("手机号码不足或超出11位！\n请重新运行")
     exit()
-getCode(phonenum)
+sendSmsCode(phonenum)
 print("验证码发送成功请耐性等待！\n")
 authCode = input("请确保你输入验证码短信是甜糖发的验证码短信，以免造成经济损失，概不负责。\n请输入验证码：\n")
 authCode = str(authCode)

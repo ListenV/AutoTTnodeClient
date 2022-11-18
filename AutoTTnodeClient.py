@@ -12,7 +12,23 @@ total = 0
 accountScore = 0
 msgTitle = "【甜糖星愿】日结详细"
 msg = "\n"
+# API域名
+baseURL = "http://tiptime-api.com"
+# 获取验证码
+GetCaptchaImageUrl = baseURL + "/api/v1/captcha/request"
+# 发送短信
+SendSmsUrl = baseURL + "/web/api/v2/login/code"
+# 验证短信
+VerifySmsCodeUrl = baseURL + "/web/api/login"
+# 用户信息
+UserInfoUrl = baseURL + "/web/api/account/message/loading"
+# 每日签到
+DailySignInUrl = baseURL + "/web/api/account/sign_in"
+# 刷新登陆时间
+RefreshLogin = baseURL + "/api/v1/login"
 
+devicesListUrl = baseURL + "/api/v1/devices?page=1&per_page=20"
+collect_rewards_url = baseURL + "/api/v1/score_logs"
 
 # 使用 QMSG 通知
 def sendQMSG(msg):
@@ -70,45 +86,46 @@ def sendServerJiang(text, desp):
     return
 
 
-# 甜糖用户初始化信息，可以获取待收取的推广信息数，可以获取账户星星数
-def getInitInfo():
-    url = "http://tiantang.mogencloud.com/web/api/account/message/loading"
+# 获取甜糖用户信息，可以获取待收取的推广信息数，可以获取账户星星数
+def getUserInfo():
     header = {"Content-Type": "application/json", "authorization": authorization}
     http = urllib3.PoolManager()
-    response = http.request('POST', url, headers=header)
+    response = http.request('POST', UserInfoUrl, headers=header)
     if response.status != 200:
-        print("getInitInfo方法请求失败，结束程序")
+        print("getUserInfo方法请求失败，结束程序")
         exit()
     data = response.data.decode('utf-8')
     data = json.loads(data)
     if data['errCode'] != 0:
-        print("发送推送微信，authorization已经失效")
+        print("开始推送通知，authorization已经失效！")
         sendServerJiang("【甜糖星愿】-Auth失效通知",
-                        "#### authorization已经失效，请重新抓包填写!\n填写邀请码123463支持作者！\n")
+                        "#### authorization已经失效，请重新抓包填写!\n")
         exit()
     data = data['data']
     return data
 
 
 # 获取设备列表，可以获取待收的星星数
-def getDevices():
-    url = "http://tiantang.mogencloud.com/api/v1/devices?page=1&type=2&per_page=200"
-    header = {"Content-Type": "application/json", "authorization": authorization}
+def getDeviceList():
+    header = {"User-Agent": "Dart/2.17 (dart:io)", "Host": "tiptime-api.com", "Platform": "android",
+              "Content-Type": "application/x-www-form-urlencoded", "authorization": authorization}
     http = urllib3.PoolManager()
-    response = http.request('GET', url, headers=header)
+    response = http.request('GET', devicesListUrl, headers=header)
     if response.status != 200:
-        print("getDevices方法请求失败，结束程序")
+        print("getDeviceList方法请求失败，结束程序")
         exit()
     data = response.data.decode('utf-8')
     data = json.loads(data)
     if data['errCode'] != 0:
-        print("发送推送微信，authorization已经失效")
+        print("开始推送通知，authorization已经失效！")
+        sendServerJiang("【甜糖星愿】-Auth失效通知",
+                        "#### authorization已经失效，请重新抓包填写!\n")
         exit()
 
     data = data['data']['data']
     if len(data) == 0:
         sendServerJiang("【甜糖星愿】请绑定通知",
-                        "#### 该账号尚未绑定设备，请绑定设备后再运行！\n填写邀请码123463支持作者！\n")
+                        "#### 该账号尚未绑定设备，请绑定设备后再运行！\n")
         exit()
     return data
 
@@ -143,17 +160,16 @@ def promote_score_logs(score):
 
 
 # 收取设备奖励
-def score_logs(device_id, score, name):
+def collect_rewards(device_id, score, name):
     global msg
     if score == 0:
         msg = msg + "\n 【" + name + "】0-🌟\n"
         return
-    url = "http://tiantang.mogencloud.com/api/v1/score_logs"
     header = {"Content-Type": "application/json", "authorization": authorization}
     body_json = {'device_id': device_id, 'score': score}
     encoded_body = json.dumps(body_json).encode('utf-8')
     http = urllib3.PoolManager()
-    response = http.request('POST', url, body=encoded_body, headers=header)
+    response = http.request('POST', collect_rewards_url, body=encoded_body, headers=header)
     if response.status != 201 and response.status != 200:
         print("score_logs方法请求失败，结束程序")
         exit()
@@ -173,10 +189,10 @@ def score_logs(device_id, score, name):
 
 # 签到功能
 def sign_in():
-    url = "http://tiantang.mogencloud.com/web/api/account/sign_in"
-    header = {"Content-Type": "application/json", "authorization": authorization}
+    header = {"User-Agent": "Dart/2.17 (dart:io)", "Host": "tiptime-api.com", "Platform": "android",
+              "Content-Type": "application/x-www-form-urlencoded", "authorization": authorization}
     http = urllib3.PoolManager()
-    response = http.request('POST', url, headers=header)
+    response = http.request('POST', DailySignInUrl, headers=header)
     if response.status != 201 and response.status != 200:
         print("sign_in方法请求失败，结束程序")
         exit()
@@ -184,11 +200,11 @@ def sign_in():
     data = json.loads(data)
     global msg
     if data['errCode'] != 0:
-        msg = msg + "\n 【签到奖励】0-🌟(失败:" + data['msg'] + ")\n"
+        msg = msg + "\n 【签到失败】：" + data['msg'] + "\n"
         return
-    msg = msg + "\n 【签到奖励】1-🌟 \n"
+    msg = msg + "\n 【签到成功】2-🌟 \n"
     global total
-    total = total + 1
+    total = total + 2
     return
 
 
@@ -204,7 +220,7 @@ def readConfig(filePath):
     return result
 
 
-# *********************************main*************************************
+# ********************************* main *************************************
 path = sys.path[0]  # 脚本所在目录
 config = readConfig(path + "/TTnodeConfig.conf")
 print("config:" + config)
@@ -225,25 +241,26 @@ if len(sckey) == 0:
 authorization = authorization.strip()
 sckey = sckey.strip()
 
-data = getInitInfo()
+data = getUserInfo()
 time.sleep(1)
 inactivedPromoteScore = data['inactivedPromoteScore']
 accountScore = data['score']
 
-devices = getDevices()
+devices = getDeviceList()
 time.sleep(1)
 msg = msg + "\n#### 【收益详细】：\n```python"
 promote_score_logs(inactivedPromoteScore)
 
+# 执行签到
 sign_in()
 time.sleep(1)
 
 for device in devices:
-    score_logs(device['hardware_id'], device['inactived_score'], device['alias'])
+    collect_rewards(device['hardware_id'], device['inactived_score'], device['alias'])
     time.sleep(1)
 
 total_str = "\n#### 【总共收取】" + str(total) + "-🌟\n"
-newdata = getInitInfo()
+newdata = getUserInfo()
 accountScore = newdata['score']
 accountScore_str = "\n#### 【账户星星】" + str(accountScore) + "-🌟\n"
 
